@@ -1,10 +1,34 @@
-import React from "react";
-import { Button, Container, Nav, Navbar as NavbarBs } from "react-bootstrap";
-import { NavLink } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import {
+  Button,
+  Container,
+  Form,
+  FormControl,
+  Nav,
+  Dropdown,
+  Navbar as NavbarBs,
+} from "react-bootstrap";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useShoppingCart } from "../context/ShoppingCartContext.tsx";
 
 function Navbar() {
-  const { openCart, cardQuantity } = useShoppingCart();
+  const { openCart, cardQuantity, produtos } = useShoppingCart();
+  const client = localStorage.getItem("token");
+  const [filter, setFilter] = useState("");
+  const [filteredItems, setFilteredItems] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const filtered = produtos.filter((item) =>
+      item.name.toLowerCase().includes(filter.toLowerCase())
+    );
+    setFilteredItems(filtered);
+  }, [filter]);
+
+  const handleFilterChange = (event) => {
+    const newFilter = event.target.value;
+    setFilter(newFilter);
+  };
 
   return (
     <>
@@ -12,15 +36,39 @@ function Navbar() {
         <Container>
           <Nav className="me-auto">
             <Nav.Link to="/" as={NavLink}>
-              Home
-            </Nav.Link>
-            <Nav.Link to="/products" as={NavLink}>
-              Produtos
+              Me Leve!
             </Nav.Link>
           </Nav>
+
+          <Form inline className="ml-auto" style={{ marginRight: ".75rem" }}>
+            <FormControl
+              type="text"
+              placeholder="Buscar produtos..."
+              value={filter}
+              onChange={handleFilterChange}
+            />
+            {filteredItems.length > 0 && (
+              <Dropdown className="mt-2 show">
+                <Dropdown.Menu show>
+                  {filteredItems.map((item, index) => (
+                    <Dropdown.Item key={item._id}>
+                      <Link to={"produto/" + item._id}>{item.name}</Link>
+                    </Dropdown.Item>
+                  ))}
+                </Dropdown.Menu>
+              </Dropdown>
+            )}
+          </Form>
+
           <Button
             onClick={openCart}
-            style={{ width: "3rem", height: "3rem", position: "relative" }}
+            style={{
+              width: "3rem",
+              height: "3rem",
+              position: "relative",
+              marginLeft: "1rem",
+              marginRight: "1rem",
+            }}
             variant="outline-primary"
             className="rounded-circle"
           >
@@ -51,6 +99,27 @@ function Navbar() {
               </div>
             )}
           </Button>
+
+          {client === null ? (
+            <Nav.Link to="/login" as={NavLink}>
+              <Button variant="outline-primary" className="ml-2">
+                {" "}
+                Login
+              </Button>
+            </Nav.Link>
+          ) : (
+            <Button
+              onClick={() => {
+                localStorage.removeItem("token");
+                navigate("#");
+              }}
+              className="ml-2 bg-danger"
+              style={{ border: "none" }}
+            >
+              {" "}
+              Sair
+            </Button>
+          )}
         </Container>
       </NavbarBs>
     </>

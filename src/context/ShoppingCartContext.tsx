@@ -3,6 +3,7 @@ import ShoppingCart from "../components/ShoppingCart";
 import axios from "axios";
 import useLocalStorage from "../hooks/useLocalStorage.tsx";
 
+
 type ShoppingCartProviderProps = {
   children: ReactNode;
 };
@@ -10,6 +11,7 @@ type ShoppingCartProviderProps = {
 type CartItem = {
   id: any;
   quantity: number;
+  price: number;
 };
 
 
@@ -18,7 +20,7 @@ type ShoppingCartContextType = {
   openCart:() => void;
   closeCart:() =>void;
   getItemNumber: (id: number) => number;
-  increaseCardQuantity: (id: number) => void;
+  increaseCardQuantity: (id: number, price: string) => void;
   decreaseCardQuantity: (id: number) => void;
   removeFromCard: (id: number) => void;
   cardQuantity: number;
@@ -42,7 +44,7 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
   const openCart = () => setIsOpen(true)
   const closeCart = () => setIsOpen(false)
   const [produtos, setProdutos] = useState([]);
-  const [loading, setLoading] = useState(true);
+ 
 
   const instance = axios.create({ baseURL: "http://localhost:8000" });
 
@@ -51,11 +53,11 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
       .get("/products")
       .then((response) => {
         setProdutos(response.data);
-        setLoading(false);
+       
       })
       .catch((err) => {
         console.log(err);
-        setLoading(false);
+       
       });
   }, []);
 
@@ -68,10 +70,10 @@ export function ShoppingCartProvider({ children }: ShoppingCartProviderProps) {
    return cardItens.find((item) => item.id === id)?.quantity || 0;
   }
 
-  function increaseCardQuantity(id: number) {
+  function increaseCardQuantity(id: number, price: string) {
     setCardItens((currentItens) => {
       if (currentItens.find((item) => item.id === id) == null) {
-        return [...currentItens, { id: id, quantity: 1 }];
+        return [...currentItens, { id: id, quantity: 1, price:price }];
       } else {
         return currentItens.map((item) => {
           if (item.id === id) {

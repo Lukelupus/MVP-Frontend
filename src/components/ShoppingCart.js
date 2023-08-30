@@ -21,11 +21,7 @@ function ShoppingCart({ isOpen, produtos }) {
             Total{" "}
             {formatCurrency(
               cardItens.reduce((total, cartItem) => {
-                const produto = produtos.find((i) => i._id === cartItem.id);
-                return (
-                  total +
-                  (produto?.weeklyPrice.$numberDecimal || 0) * cartItem.quantity
-                );
+                return total + cartItem.price * cartItem.quantity;
               }, 0)
             )}
           </div>
